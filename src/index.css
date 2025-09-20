@@ -8,33 +8,63 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Ayurvedic-inspired color palette */
+    --background: 45 15% 97%;
+    --foreground: 150 8% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 45 20% 99%;
+    --card-foreground: 150 8% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 45 20% 99%;
+    --popover-foreground: 150 8% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Deep sage green - primary Ayurvedic color */
+    --primary: 150 35% 25%;
+    --primary-foreground: 45 20% 99%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Warm terracotta - secondary earth tone */
+    --secondary: 15 40% 85%;
+    --secondary-foreground: 150 8% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Soft muted tones */
+    --muted: 45 25% 92%;
+    --muted-foreground: 150 8% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Golden accent - representing wellness */
+    --accent: 35 65% 70%;
+    --accent-foreground: 150 8% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Gentle destructive - muted red */
+    --destructive: 0 50% 55%;
+    --destructive-foreground: 45 20% 99%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Subtle borders and inputs */
+    --border: 45 20% 88%;
+    --input: 45 20% 92%;
+    --ring: 150 35% 25%;
+
+    /* Success color - vibrant green */
+    --success: 120 50% 45%;
+    --success-foreground: 45 20% 99%;
+
+    /* Warning color - warm amber */
+    --warning: 35 80% 60%;
+    --warning-foreground: 150 8% 15%;
+
+    /* Ayurvedic healing gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(150 35% 25%), hsl(150 40% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(15 40% 85%), hsl(25 45% 80%));
+    --gradient-wellness: linear-gradient(135deg, hsl(35 65% 70%), hsl(45 70% 75%));
+    --gradient-healing: linear-gradient(180deg, hsl(45 15% 97%), hsl(120 20% 95%));
+
+    /* Elegant shadows with natural depth */
+    --shadow-gentle: 0 4px 20px -4px hsl(150 35% 25% / 0.1);
+    --shadow-wellness: 0 8px 32px -8px hsl(35 65% 70% / 0.15);
+    --shadow-healing: 0 12px 48px -12px hsl(150 35% 25% / 0.2);
+
+    /* Smooth therapeutic transitions */
+    --transition-gentle: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-wellness: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 
     --radius: 0.5rem;
 
@@ -101,5 +131,37 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: var(--gradient-healing);
+  }
+}
+
+@layer components {
+  /* Wellness component styles */
+  .wellness-card {
+    @apply bg-card border border-border rounded-lg p-6;
+    box-shadow: var(--shadow-gentle);
+    transition: var(--transition-gentle);
+  }
+  
+  .wellness-card:hover {
+    box-shadow: var(--shadow-wellness);
+    transform: translateY(-2px);
+  }
+  
+  .healing-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .wellness-gradient {
+    background: var(--gradient-wellness);
+  }
+  
+  .therapy-progress {
+    @apply relative overflow-hidden rounded-full bg-secondary;
+  }
+  
+  .therapy-progress-bar {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+    background: var(--gradient-primary);
   }
 }

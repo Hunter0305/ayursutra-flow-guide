@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -80,10 +88,39 @@ export default {
             height: "0",
           },
         },
+        "healing-pulse": {
+          "0%, 100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "0.8",
+            transform: "scale(1.02)",
+          },
+        },
+        "wellness-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px hsl(var(--accent) / 0.1)",
+          },
+          "50%": {
+            boxShadow: "0 0 30px hsl(var(--accent) / 0.2)",
+          },
+        },
+        "therapy-progress": {
+          "0%": {
+            width: "0%",
+          },
+          "100%": {
+            width: "var(--progress-width, 0%)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "healing-pulse": "healing-pulse 3s ease-in-out infinite",
+        "wellness-glow": "wellness-glow 4s ease-in-out infinite",
+        "therapy-progress": "therapy-progress 1.5s ease-out forwards",
       },
     },
   },
