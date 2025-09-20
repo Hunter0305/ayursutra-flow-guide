@@ -52,6 +52,36 @@ const Index = () => {
       duration: "45 min",
       location: "Consultation Room",
       status: "scheduled" as const
+    },
+    {
+      id: "4",
+      type: "Udvartana (Herbal Powder Massage)",
+      practitioner: "Dr. Priya Sharma",
+      date: new Date(Date.now() - 86400000).toISOString(),
+      time: "9:00 AM",
+      duration: "75 min",
+      location: "Therapy Room B",
+      status: "completed" as const
+    },
+    {
+      id: "5",
+      type: "Nasya Therapy",
+      practitioner: "Dr. Vikram Singh",
+      date: new Date(Date.now() - 172800000).toISOString(),
+      time: "3:30 PM",
+      duration: "45 min",
+      location: "Treatment Room 1",
+      status: "completed" as const
+    },
+    {
+      id: "6",
+      type: "Abhyanga (Oil Massage)",
+      practitioner: "Dr. Raj Patel",
+      date: new Date(Date.now() - 259200000).toISOString(),
+      time: "1:00 PM",
+      duration: "90 min",
+      location: "Therapy Room A",
+      status: "completed" as const
     }
   ];
 
