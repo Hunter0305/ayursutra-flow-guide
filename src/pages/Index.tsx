@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Leaf, Users, Calendar, TrendingUp, Bell, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Leaf, Users, Calendar, TrendingUp, Bell, Star, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,12 +7,37 @@ import { Navigation } from "@/components/Navigation";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { TherapyScheduler } from "@/components/TherapyScheduler";
 import { FeedbackSystem } from "@/components/FeedbackSystem";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/ayursutra-hero.jpg";
 
 type UserRole = "patient" | "practitioner" | "admin";
 
 const Index = () => {
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [userRole, setUserRole] = useState<UserRole>("patient");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // Mock data
   const mockProgressData = {
@@ -157,154 +182,179 @@ const Index = () => {
   const { title, description } = getDashboardTitle();
 
   return (
-    <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
-      <Navigation userRole={userRole} onRoleChange={setUserRole} />
-      
-      {/* Hero Section */}
-      <div className="relative mb-8 rounded-2xl overflow-hidden">
-        <div 
-          className="h-64 md:h-80 bg-cover bg-center relative"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40 flex items-center">
-            <div className="max-w-2xl p-8 text-white">
-              <div className="flex items-center gap-2 mb-4">
-                <Leaf className="h-8 w-8" />
-                <span className="text-lg font-medium">Ancient Wisdom, Modern Care</span>
-              </div>
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">{title}</h1>
-              <p className="text-lg md:text-xl text-white/90">{description}</p>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5">
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                AyurSutra
+              </h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-muted-foreground">Welcome, {user.email}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={signOut}
+                className="flex items-center space-x-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </Button>
+              <Navigation userRole={userRole} onRoleChange={setUserRole} />
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="wellness-card hover:animate-wellness-glow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        {/* Hero Section */}
+        <div className="relative mb-8 rounded-2xl overflow-hidden">
+          <div 
+            className="h-64 md:h-80 bg-cover bg-center relative"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40 flex items-center">
+              <div className="max-w-2xl p-8 text-white">
+                <div className="flex items-center gap-2 mb-4">
+                  <Leaf className="h-8 w-8" />
+                  <span className="text-lg font-medium">Ancient Wisdom, Modern Care</span>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                <h1 className="text-3xl md:text-5xl font-bold mb-4">{title}</h1>
+                <p className="text-lg md:text-xl text-white/90">{description}</p>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
-        <div className="space-y-8">
-          <ProgressTracker data={mockProgressData} userRole={userRole} />
-          
-          {userRole === "patient" && (
-            <FeedbackSystem userRole={userRole} />
-          )}
-          
-          {userRole !== "patient" && (
-            <FeedbackSystem userRole={userRole} recentFeedback={mockFeedback} />
-          )}
+            </div>
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-8">
-          <TherapyScheduler sessions={mockSessions} userRole={userRole} />
-          
-          {/* Quick Actions */}
-          <Card className="wellness-card">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                {userRole === "patient" 
-                  ? "Manage your therapy journey" 
-                  : "Common administrative tasks"
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {userRole === "patient" ? (
-                <>
-                  <Button variant="outline" className="w-full">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Session
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    View Progress
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Notifications
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Users className="h-4 w-4 mr-2" />
-                    Contact Support
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" className="w-full">
-                    <Users className="h-4 w-4 mr-2" />
-                    Add Patient
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Schedule Session
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    View Analytics
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Send Reminders
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {stats.map((stat) => (
+            <Card key={stat.label} className="wellness-card hover:animate-wellness-glow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </div>
+                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-          {/* System Status/Health Tips */}
-          <Card className="wellness-card border-success/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-success" />
-                {userRole === "patient" ? "Daily Wellness Tip" : "System Status"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userRole === "patient" ? (
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    🌿 <strong>Ayurvedic Wisdom:</strong> Start your day with warm water and lemon to support your digestive fire (Agni) and enhance the benefits of your Panchakarma treatments.
-                  </p>
-                  <Badge variant="secondary" className="text-xs">
-                    Tip of the day
-                  </Badge>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">System Health</span>
-                    <Badge className="bg-success/10 text-success">Excellent</Badge>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            <ProgressTracker data={mockProgressData} userRole={userRole} />
+            
+            {userRole === "patient" && (
+              <FeedbackSystem userRole={userRole} />
+            )}
+            
+            {userRole !== "patient" && (
+              <FeedbackSystem userRole={userRole} recentFeedback={mockFeedback} />
+            )}
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-8">
+            <TherapyScheduler sessions={mockSessions} userRole={userRole} />
+            
+            {/* Quick Actions */}
+            <Card className="wellness-card">
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>
+                  {userRole === "patient" 
+                    ? "Manage your therapy journey" 
+                    : "Common administrative tasks"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {userRole === "patient" ? (
+                  <>
+                    <Button variant="outline" className="w-full">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Book Session
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      View Progress
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Notifications
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Contact Support
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Add Patient
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Schedule Session
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Send Reminders
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* System Status/Health Tips */}
+            <Card className="wellness-card border-success/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Leaf className="h-5 w-5 text-success" />
+                  {userRole === "patient" ? "Daily Wellness Tip" : "System Status"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {userRole === "patient" ? (
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      🌿 <strong>Ayurvedic Wisdom:</strong> Start your day with warm water and lemon to support your digestive fire (Agni) and enhance the benefits of your Panchakarma treatments.
+                    </p>
+                    <Badge variant="secondary" className="text-xs">
+                      Tip of the day
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database Status</span>
-                    <Badge className="bg-success/10 text-success">Online</Badge>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">System Health</span>
+                      <Badge className="bg-success/10 text-success">Excellent</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Database Status</span>
+                      <Badge className="bg-success/10 text-success">Online</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Notification Service</span>
+                      <Badge className="bg-success/10 text-success">Active</Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Notification Service</span>
-                    <Badge className="bg-success/10 text-success">Active</Badge>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

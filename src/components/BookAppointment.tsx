@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
 
 interface BookAppointmentProps {
   userRole: "patient" | "practitioner" | "admin";
@@ -89,6 +92,7 @@ const generateTimeSlots = (date: Date | undefined): TimeSlot[] => {
 };
 
 export function BookAppointment({ userRole, trigger }: BookAppointmentProps) {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -96,12 +100,13 @@ export function BookAppointment({ userRole, trigger }: BookAppointmentProps) {
   const [selectedPractitioner, setSelectedPractitioner] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const timeSlots = generateTimeSlots(selectedDate);
   const availableSlots = timeSlots.filter(slot => slot.available);
 
-  const handleBookAppointment = () => {
-    if (!selectedDate || !selectedTime || !selectedTreatment || !selectedPractitioner) {
+  const handleBookAppointment = async () => {
+    if (!selectedDate || !selectedTime || !selectedTreatment || !selectedPractitioner || !user) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields to book your appointment.",
@@ -110,20 +115,52 @@ export function BookAppointment({ userRole, trigger }: BookAppointmentProps) {
       return;
     }
 
-    // Simulate booking
-    toast({
-      title: "Appointment Booked Successfully! 🌿",
-      description: `Your ${treatmentTypes.find(t => t.id === selectedTreatment)?.name} session is scheduled for ${selectedDate.toDateString()} at ${selectedTime}`,
-    });
+    setLoading(true);
+    
+    try {
+      const selectedTreatmentType = treatmentTypes.find(t => t.id === selectedTreatment);
+      const selectedPractitionerName = practitioners.find(p => p.id === selectedPractitioner)?.name;
+      
+      const { error } = await supabase
+        .from('appointments')
+        .insert({
+          user_id: user.id,
+          treatment_type: selectedTreatmentType?.name || selectedTreatment,
+          practitioner: selectedPractitionerName || selectedPractitioner,
+          appointment_date: format(selectedDate, "yyyy-MM-dd"),
+          appointment_time: selectedTime,
+          duration: selectedTreatmentType?.duration || "60 minutes",
+          notes: notes || null,
+          status: 'scheduled'
+        });
 
-    // Reset form
-    setSelectedDate(undefined);
-    setSelectedTime("");
-    setSelectedTreatment("");
-    setSelectedPractitioner("");
-    setNotes("");
-    setStep(1);
-    setIsOpen(false);
+      if (error) {
+        throw error;
+      }
+
+      // Simulate booking
+      toast({
+        title: "Appointment Booked Successfully! 🌿",
+        description: `Your ${selectedTreatmentType?.name} session is scheduled for ${selectedDate.toDateString()} at ${selectedTime}`,
+      });
+
+      // Reset form
+      setSelectedDate(undefined);
+      setSelectedTime("");
+      setSelectedTreatment("");
+      setSelectedPractitioner("");
+      setNotes("");
+      setStep(1);
+      setIsOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Booking Failed",
+        description: error.message || "Unable to book appointment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const nextStep = () => {
@@ -388,9 +425,10 @@ export function BookAppointment({ userRole, trigger }: BookAppointmentProps) {
               <Button 
                 onClick={handleBookAppointment}
                 className="healing-gradient text-white"
+                disabled={loading}
               >
                 <Check className="h-4 w-4 mr-2" />
-                Confirm Booking
+                {loading ? "Booking..." : "Confirm Booking"}
               </Button>
             )}
           </div>
